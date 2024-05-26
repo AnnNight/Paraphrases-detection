@@ -1,0 +1,36 @@
+create table IF NOT EXISTS users
+(
+    id_user serial primary key,
+    login    text not null unique,
+    password text not null,
+    phone_number bigint CHECK (phone_number >=70000000000 and phone_number<=90000000000),
+    email text
+);
+
+-- PERFORM dblink_exec('connection','
+create or replace function add_user(login_ text, password text, phone_number bigint, email text)
+    returns integer as
+$$
+begin
+insert into users (login, password, phone_number, email) values (login_, password, phone_number, email);
+return (SELECT id_user from users where login_ = users.login);
+end;
+$$ language plpgsql;--');
+
+-- PERFORM dblink_exec('connection','
+create or replace function get_user(login_ text, password_ text)
+    returns integer as
+$$
+begin
+return (SELECT id_user from users where users.login = login_ and users.password = password_);
+end;
+$$ language plpgsql;--');
+
+create or replace function find_login(login_ text)
+    returns integer as
+$$
+begin
+return (SELECT id_user from users where users.login = login_);
+end;
+$$ language plpgsql;
+--Select add_user('KatieD', '239', 89101382421, 'test@mail.ru');
